@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
-using System.Net;
 
 namespace Route2Netch
 {
@@ -19,7 +13,7 @@ namespace Route2Netch
             InitializeComponent();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void Button1_Click(object sender, EventArgs e)
         {
             if (textBox1.Text == string.Empty) return;
             if (!IsFileNameValid(textBox1.Text))
@@ -31,16 +25,16 @@ namespace Route2Netch
             label2.Text = "正在抓取路由表，可能需要较长时间";
             CatchRoute();
             label2.Text = "正在创建模式文件";
-            var rule= Route2Rule(Path.Combine(Environment.CurrentDirectory, "route.txt"));
+            var rule = Route2Rule(Path.Combine(Environment.CurrentDirectory, "route.txt"));
             if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, "mode")))
                 Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, "mode"));
-            string firstLine = "# " + gameName + " (TUN/TAP)" + ", 1, 0\r\n";
+            string firstLine = "# " + gameName + " By-MirrorCY" + ", 1, 0\r\n";
             File.WriteAllText(Path.Combine(Environment.CurrentDirectory, "mode", gameName + " (TUN-TAP).txt"),
                 firstLine + rule);
             File.Delete(Path.Combine(Environment.CurrentDirectory, "route.txt"));
             label2.Text = "抓取完成";
         }
-        private void button2_Click(object sender, EventArgs e)
+        private void Button2_Click(object sender, EventArgs e)
         {
             if (textBox1.Text == string.Empty) return;
             if (!IsFileNameValid(textBox1.Text))
@@ -55,13 +49,13 @@ namespace Route2Netch
             var rule = Route2Rule(Path.Combine(Environment.CurrentDirectory, "route.txt"));
             if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, "rules")))
                 Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, "rules"));
-            string firstLine = "#" + gameName + "," + gameName + ",0,0,1,0,1,0,By-Route2Netch" + Environment.NewLine;
+            string firstLine = "#" + gameName + "," + gameName + ",0,0,1,0,1,0,By-MirrorCY-Using-Route2Netch" + Environment.NewLine;
             File.WriteAllText(Path.Combine(Environment.CurrentDirectory, "rules", gameName + ".rules"),
                 firstLine + rule);
             File.Delete(Path.Combine(Environment.CurrentDirectory, "route.txt"));
             label2.Text = "抓取完成";
         }
-        private void button3_Click(object sender, EventArgs e)
+        private void Button3_Click(object sender, EventArgs e)
         {
             if (textBox1.Text == string.Empty) return;
             if (!IsFileNameValid(textBox1.Text))
@@ -76,13 +70,13 @@ namespace Route2Netch
             var rule = Route2Rule(Path.Combine(Environment.CurrentDirectory, "route.txt"));
             if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, "mode")))
                 Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, "mode"));
-            string firstLine = "# " + gameName + " (TUN/TAP)" + ", 1, 0\r\n";
+            string firstLine = "# " + gameName + " By-MirrorCY" + ", 1, 0\r\n";
             File.WriteAllText(Path.Combine(Environment.CurrentDirectory, "mode", gameName + " (TUN-TAP).txt"),
                 firstLine + rule);
             rule = Route2Rule(Path.Combine(Environment.CurrentDirectory, "route.txt"));
             if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, "rules")))
                 Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, "rules"));
-            firstLine = "#" + gameName + "," + gameName + ",0,0,1,0,1,0,By-Route2Netch" + Environment.NewLine;
+            firstLine = "#" + gameName + "," + gameName + ",0,0,1,0,1,0,By-MirrorCY-Using-Route2Netch" + Environment.NewLine;
             File.WriteAllText(Path.Combine(Environment.CurrentDirectory, "rules", gameName + ".rules"),
                 firstLine + rule);
             File.Delete(Path.Combine(Environment.CurrentDirectory, "route.txt"));
@@ -131,9 +125,8 @@ namespace Route2Netch
             var routeLines = File.ReadAllLines(routePath);
             int partFlag = 0;
             bool startFlag = false;
-            string metric = string.Empty;
             var sb = new StringBuilder();
-            for(int i=0; i < routeLines.Length; i++)
+            for (int i = 0; i < routeLines.Length; i++)
             {
                 if (routeLines[i].StartsWith("="))
                 {
@@ -150,7 +143,7 @@ namespace Route2Netch
                 {
                     List<string> avaArr = new List<string>();
                     var splitParts = routeLines[i].Split(' ');
-                    foreach(var str in splitParts)
+                    foreach (var str in splitParts)
                     {
                         if (str != "")
                         {
@@ -161,15 +154,16 @@ namespace Route2Netch
                     if (avaArr[0].Split('.')[0] == "172" &&
                         (int.Parse(avaArr[0].Split('.')[1]) >= 16 && int.Parse(avaArr[0].Split('.')[1]) < 32))
                         continue;
-                    if (avaArr[0].Split('.')[0] == "192"&& avaArr[0].Split('.')[1] == "168") continue;
+                    if (avaArr[0].Split('.')[0] == "192" && avaArr[0].Split('.')[1] == "168") continue;
                     if (avaArr[0] == "0.0.0.0") continue;
                     if (avaArr[0].StartsWith("127.0.0.")) continue;
                     if (avaArr[0].StartsWith("224.0.0.")) continue;
-                    if (avaArr[0]=="255.255.255.255") continue;
+                    if (avaArr[0] == "255.255.255.255") continue;
+                    if (avaArr[0] == "127.255.255.255") continue;
                     sb.Append(avaArr[0]);
                     int netmask = 0;
                     var nm = avaArr[1].Split('.');
-                    for(int k = 0; k < 4; k++)
+                    for (int k = 0; k < 4; k++)
                     {
                         int t = int.Parse(nm[k]);
                         if (t != 0)
@@ -178,7 +172,7 @@ namespace Route2Netch
                             netmask += dexstr.Length;
                         }
                     }
-                    sb.Append("/" + netmask.ToString());sb.Append(Environment.NewLine);
+                    sb.Append("/" + netmask.ToString()); sb.Append(Environment.NewLine);
                 }
                 if (partFlag > 3)
                 {
